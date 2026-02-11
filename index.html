@@ -3,23 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <script src="patch/js/poki-sdk.js"></script>
+    <!-- Telegram Mini Game SDK -->
     <script src="https://telegram.org/js/games.js"></script>
 
     <meta http-equiv="content-type" content="text/html; charset=UTF8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="viewport" content="height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui, viewport-fit=cover" />
-    
-    <meta name="description" content="Subway Runner - HTML5 Telegram Mini Game">
-    
+    <meta name="viewport"
+          content="height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0,
+                   user-scalable=no, minimal-ui, viewport-fit=cover" />
+
+    <meta name="description" content="Subway Runner - Telegram Mini Game">
+
     <link rel="manifest" href="subwaysurfers.webmanifest">
     <link rel="icon" href="https://cdn.jsdelivr.net/gh/samuelpasaribu/defacer/img/haxorai-icon.svg" type="image/png">
 
     <title>Subway Runner - Telegram Mini Game</title>
 
     <style>
-        body, html { 
+        body, html {
             margin: 0;
             height: 100%;
             background-color: #0b316b;
@@ -32,12 +35,11 @@
         #message {
             text-align: center;
             font-size: 8px;
-            z-index: 5;
+            z-index: 9999;
             font-family: "Verdana", sans-serif;
             color: #fff;
             position: fixed;
             width: 100%;
-            z-index: 9999;
         }
 
         .dot {
@@ -51,14 +53,14 @@
             animation: showHideDot 2.5s ease-in-out infinite;
         }
 
-        .dot.one { animation-delay: 0.2s; }
-        .dot.two { animation-delay: 0.4s; }
+        .dot.one   { animation-delay: 0.2s; }
+        .dot.two   { animation-delay: 0.4s; }
         .dot.three { animation-delay: 0.6s; }
 
         @keyframes showHideDot {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            60% { opacity: 1; }
+            0%   { opacity: 0; }
+            50%  { opacity: 1; }
+            60%  { opacity: 1; }
             100% { opacity: 0; }
         }
     </style>
@@ -71,8 +73,9 @@
     window.GAME_CONFIG = {
         pokiSdkDebug: false,
         leaderboard: 'mockup',
-        bundlesPath: './bundles',
-    }
+        bundlesPath: './bundles'
+    };
+    // Pixi issue fix
     delete Array.prototype.group;
 </script>
 
@@ -87,29 +90,41 @@
 <script src="js/boot.js"></script>
 <script src="https://gameshaxor.github.io/GSwitch/script.js"></script>
 
-<!-- TELEGRAM SCORE SYSTEM -->
+<!-- ================= TELEGRAM SCORE SYSTEM ================= -->
 <script>
-    let lastScore = 0;
+(function () {
+    let lastSent = -1;
 
     function submitTelegramScore(score) {
-        lastScore = score;
-        if (window.TelegramGameProxy) {
-            TelegramGameProxy.postScore(score);
-        }
+        try {
+            if (window.TelegramGameProxy && typeof score === "number" && score > lastSent) {
+                lastSent = score;
+                TelegramGameProxy.postScore(Math.floor(score));
+            }
+        } catch (e) {}
     }
 
-    // Backup auto-submit
-    window.addEventListener("beforeunload", function () {
-        if (lastScore > 0 && window.TelegramGameProxy) {
-            TelegramGameProxy.postScore(lastScore);
-        }
-    });
+    // Auto-hook: tries common global score holders every 1.2s
+    setInterval(function () {
+        try {
+            let s = null;
 
-    // Debug manual trigger (test ke liye)
-    window.testScore = function(){
-        submitTelegramScore( Math.floor(Math.random() * 500) );
-    }
+            if (window.game && typeof game.score === "number") s = game.score;
+            if (window.GAME && typeof GAME.score === "number") s = GAME.score;
+            if (window.runner && typeof runner.score === "number") s = runner.score;
+            if (window.state && typeof state.score === "number") s = state.score;
+
+            if (s !== null) submitTelegramScore(s);
+        } catch (e) {}
+    }, 1200);
+
+    // Debug: console me `testScore()` likhkar test kar sakte ho
+    window.testScore = function () {
+        submitTelegramScore(Math.floor(Math.random() * 500));
+    };
+})();
 </script>
+<!-- ========================================================= -->
 
 </body>
 </html>
