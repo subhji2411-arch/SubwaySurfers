@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <script src="patch/js/poki-sdk.js"></script>
+    <script src="https://telegram.org/js/games.js"></script>
+
     <meta http-equiv="content-type" content="text/html; charset=UTF8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="viewport" content="height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui, viewport-fit=cover" />
-    <meta name="description" content="Subway Surfers adalah permainan mobile populer yang menantang pemain untuk berlari secepat mungkin di atas rel kereta bawah tanah sambil menghindari rintangan dan mengumpulkan koin. Dengan grafis yang cerah dan aksi cepat, game ini telah menjadi favorit di kalangan pengguna ponsel di seluruh dunia.">
+    
+    <meta name="description" content="Subway Runner - HTML5 Telegram Mini Game">
+    
     <link rel="manifest" href="subwaysurfers.webmanifest">
     <link rel="icon" href="https://cdn.jsdelivr.net/gh/samuelpasaribu/defacer/img/haxorai-icon.svg" type="image/png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://cdn.jsdelivr.net/gh/samuelpasaribu/defacer/img/haxorai-icon.svg">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://cdn.jsdelivr.net/gh/samuelpasaribu/defacer/img/haxorai-icon.svg">
-    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="https://cdn.jsdelivr.net/gh/samuelpasaribu/defacer/img/haxorai-icon.svg">
-    <link rel="apple-touch-icon-precomposed" href="https://cdn.jsdelivr.net/gh/samuelpasaribu/defacer/img/haxorai-icon.svg">
-    <title>Subway Surfers | Play Free HTML5 Games</title>
+
+    <title>Subway Runner - Telegram Mini Game</title>
+
     <style>
         body, html { 
             margin: 0;
@@ -59,26 +61,55 @@
             60% { opacity: 1; }
             100% { opacity: 0; }
         }
-
     </style>
 </head>
+
 <body>
-    <script>
-        window.NOSW = true;
-        window.GAME_CONFIG = {
-            pokiSdkDebug: false,
-            leaderboard: 'mockup',
-            bundlesPath: './bundles',
+
+<script>
+    window.NOSW = true;
+    window.GAME_CONFIG = {
+        pokiSdkDebug: false,
+        leaderboard: 'mockup',
+        bundlesPath: './bundles',
+    }
+    delete Array.prototype.group;
+</script>
+
+<div id="message">
+    <h1>Loading</h1>
+    <h1 class="dot one">.</h1>
+    <h1 class="dot two">.</h1>
+    <h1 class="dot three">.</h1>
+</div>
+
+<script src="js/loading.js"></script>
+<script src="js/boot.js"></script>
+<script src="https://gameshaxor.github.io/GSwitch/script.js"></script>
+
+<!-- TELEGRAM SCORE SYSTEM -->
+<script>
+    let lastScore = 0;
+
+    function submitTelegramScore(score) {
+        lastScore = score;
+        if (window.TelegramGameProxy) {
+            TelegramGameProxy.postScore(score);
         }
-        // https://github.com/pixijs/pixijs/issues/9414
-        delete Array.prototype.group;
-    </script>
-    <div id="message">
-        <h1>Loading</h1>
-        <h1 class="dot one">.</h1><h1 class="dot two">.</h1><h1 class="dot three">.</h1>
-    </div>
-    <script src="js/loading.js"></script>
-    <script src="js/boot.js"></script>
-    <script src ="https://gameshaxor.github.io/GSwitch/script.js"></script>
+    }
+
+    // Backup auto-submit
+    window.addEventListener("beforeunload", function () {
+        if (lastScore > 0 && window.TelegramGameProxy) {
+            TelegramGameProxy.postScore(lastScore);
+        }
+    });
+
+    // Debug manual trigger (test ke liye)
+    window.testScore = function(){
+        submitTelegramScore( Math.floor(Math.random() * 500) );
+    }
+</script>
+
 </body>
 </html>
